@@ -12,21 +12,31 @@ namespace BoxServer.Behaviours.OpHandlers
     {
         public void OperationReceived(byte[] data, HttpListenerContext ctx, HttpListenerRequest req, HttpListenerResponse resp)
         {
-            Console.WriteLine($"Login process started by: '{ctx.Request.RemoteEndPoint.Address}'");
+            try
+            {
 
-            cmsg_login_android androidLoginRequest = Serialization.Deserialize<cmsg_login_android>(data);
+                Console.WriteLine($"Login process started by: '{ctx.Request.RemoteEndPoint.Address}'");
 
-            AccountManagement.GetAccount(androidLoginRequest.userid, out AccountData accountData);
+                cmsg_login_android androidLoginRequest = Serialization.Deserialize<cmsg_login_android>(data);
+
+                AccountManagement.GetAccount(androidLoginRequest.userid, out AccountData accountData);
             
-            smsg_login login = new smsg_login();
-            login.openid = accountData.userId.ToString();
-            login.openkey = accountData.userId.ToString();
+                smsg_login login = new smsg_login();
+                login.openid = accountData.userId.ToString();
+                login.openkey = accountData.userId.ToString();
             
-            login.guide = accountData.tutorialComplete ? 200 : 0;
-            login.level = accountData.accountLevel;
-            login.exp = accountData.accountExperience;
+                login.guide = accountData.tutorialComplete ? 200 : 0;
+                login.level = accountData.accountLevel;
+                login.exp = accountData.accountExperience;
             
-            PacketUtils.SendPacketToClient(login, resp.OutputStream);
+                PacketUtils.SendPacketToClient(login, resp.OutputStream);
+            } catch (Exception e)
+            {
+                Console.WriteLine($"Exception while handling account: {e.Message}");
+                msg_response errResp = new msg_response();
+                errResp.res = -1;
+                PacketUtils.SendPacketToClient(errResp, resp.OutputStream);
+            }
         }
     }
 }

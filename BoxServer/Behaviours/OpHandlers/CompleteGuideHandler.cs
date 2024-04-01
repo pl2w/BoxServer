@@ -12,19 +12,28 @@ namespace BoxServer.Behaviours.OpHandlers
     {
         public void OperationReceived(byte[] data, HttpListenerContext ctx, HttpListenerRequest req, HttpListenerResponse resp)
         {
-            Console.WriteLine($"Complete guide started by: '{ctx.Request.RemoteEndPoint}'");
+            try
+            {
+                Console.WriteLine($"Complete guide started by: '{ctx.Request.RemoteEndPoint}'");
 
-            Console.WriteLine(Serialization.Deserialize<cmsg_complete_guide>(data).common.userid);
-            //
-            //AccountManagement.GetAccount(Serialization.Deserialize<cmsg_complete_guide>(data).common.userid, out AccountData account);
-            //account.tutorialComplete = true;
-            //AccountManagement.SaveAccountData(account);
-            //
-            //msg_response response = new msg_response();
-            //response.res = 0;
-            //response.msg = null;
-            //response.error = null;
-            //PacketUtils.SendResponseToClient(response, resp.OutputStream);
+                Console.WriteLine(Serialization.Deserialize<cmsg_complete_guide>(data).common.userid);
+                //
+                //AccountManagement.GetAccount(Serialization.Deserialize<cmsg_complete_guide>(data).common.userid, out AccountData account);
+                //account.tutorialComplete = true;
+                //AccountManagement.SaveAccountData(account);
+                //
+                //msg_response response = new msg_response();
+                //response.res = 0;
+                //response.msg = null;
+                //response.error = null;
+                //PacketUtils.SendResponseToClient(response, resp.OutputStream);
+            } catch (Exception e)
+            {
+                Console.WriteLine($"Exception while deserializing data: {e.Message}");
+                msg_response errResp = new msg_response();
+                errResp.res = -1;
+                PacketUtils.SendPacketToClient(errResp, resp.OutputStream);
+            }
         }
     }
 }
